@@ -1,16 +1,24 @@
 import React, { useRef, useState } from "react";
 import gsap from "gsap";
-import { useGSAP } from "@gsap/react"; 
+import { useGSAP } from "@gsap/react";
 import "remixicon/fonts/remixicon.css";
 import Locationpannel from "../components/Location.pannel";
-
+import VehclePanel from "../components/VehclePanel";
+import ConfirmRide from "../components/ConfirmRide";
+import WaitforVehicle from "../components/WaitforVehicle";
+import LookingforDriver from "../components/LookingforDriver";
 const Home = () => {
   const [pickup, setpickup] = useState("");
   const [destination, setdestination] = useState("");
   const [pannelopen, setpannelopen] = useState(false);
   const pannelRef = useRef(null);
   const pannelcloseRef = useRef(null);
-
+  const [vehiclepanel, setvehiclepanel] = useState(false);
+  const [confirmRidepanel, setconfirmRidepanel] = useState(false)
+  const [vehiclefound, setvehicleFound] = useState(false)
+  const vehiclePanelRef = useRef(null);
+  const confirmRidepanelRef = useRef(null);
+  const  VehicleFoundRef = useRef(null);
   const submitHandler = (e) => {
     e.preventDefault();
   };
@@ -41,6 +49,43 @@ const Home = () => {
       });
     }
   }, [pannelopen]);
+
+  useGSAP(() => {
+    if (vehiclepanel) {
+      gsap.to(vehiclePanelRef.current, {
+        transform: "translateY(0%)",
+      });
+    } else {
+      gsap.to(vehiclePanelRef.current, {
+        transform: "translateY(100%)",
+      });
+    }
+  }, [vehiclepanel]);
+
+  useGSAP(() => {
+    if (confirmRidepanel) {
+      gsap.to(confirmRidepanelRef.current, {
+        transform: "translateY(0%)",
+      });
+    } else {
+      gsap.to(confirmRidepanelRef.current, {
+        transform: "translateY(100%)",
+      });
+    }
+  }, [confirmRidepanel]);
+
+  useGSAP(() => {
+    if (vehiclefound) {
+      gsap.to(VehicleFoundRef.current, {
+        transform: "translateY(0%)",
+      });
+    } else {
+      gsap.to(VehicleFoundRef.current, {
+        transform: "translateY(100%)",
+      });
+    }
+  }, [vehiclefound]);
+
   return (
     <div>
       <img
@@ -55,7 +100,7 @@ const Home = () => {
           alt=""
         />
       </div>
-      <div className="w-full absolute flex flex-col justify-end h-screen top-0">
+      <div className="w-full absolute  flex flex-col justify-end h-screen top-0">
         <div className="w-full p-5 bg-white h-[30%] relative">
           <h4 className="text-2xl font-semibold">Find a trip</h4>
 
@@ -88,11 +133,32 @@ const Home = () => {
         </div>
         <div
           ref={pannelRef}
-          className="w-full bg-white overflow-hidden"
+          className="w-full  bg-white overflow-hidden"
           style={{ height: "0%" }}
         >
-          <Locationpannel/>
+          <Locationpannel
+            setvehiclepanel={setvehiclepanel}
+            setpannelopen={setpannelopen}
+          />
         </div>
+      </div>
+      <div
+        ref={vehiclePanelRef}
+        className="fixed z-10 translate-y-full bottom-0 bg-white px-3 py-10 pt-12 w-full"
+      >
+        <VehclePanel setconfirmRidepanel={setconfirmRidepanel} setvehiclepanel={setvehiclepanel} />
+      </div>
+      <div
+        ref={confirmRidepanelRef}
+        className="fixed z-10 translate-y-full bottom-0 bg-white px-3 py-6 pt-12 w-full"
+      >
+        <ConfirmRide setconfirmRidepanel={setconfirmRidepanel} setvehicleFound={setvehicleFound} setvehiclepanel={setvehiclepanel} />
+      </div>
+      <div
+       ref={VehicleFoundRef }
+        className="fixed z-10 translate-y-full bottom-0 bg-white px-3 py-6 pt-12 w-full"
+      >
+       <LookingforDriver setvehicleFound={setvehicleFound} />
       </div>
     </div>
   );
