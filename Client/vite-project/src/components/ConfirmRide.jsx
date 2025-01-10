@@ -1,6 +1,15 @@
 import React from "react";
 
-const ConfirmRide = ({ setconfirmRidepanel,setvehicleFound, setvehiclepanel }) => {
+const ConfirmRide = ({
+  setconfirmRidepanel,
+  setvehicleFound,
+  setvehiclepanel,
+  createRide,
+  pickup,
+  fare,
+  vehicleType,
+  destination,
+}) => {
   return (
     <div>
       <h1
@@ -24,35 +33,36 @@ const ConfirmRide = ({ setconfirmRidepanel,setvehicleFound, setvehiclepanel }) =
             <i className="ri-map-pin-fill text-lg"></i>
             <div>
               <h1 className="text-lg font-medium">50/34-S</h1>
-              <h3 className="text-sm text-gray-600">
-                Gorkahpur, syamnagar, uttarpradesh
-              </h3>
+              <h3 className="text-sm text-gray-600">{pickup}</h3>
             </div>
           </div>
           <div className="flex gap-5 items-center p-3 border-b-2">
             <i className="ri-map-pin-user-fill text-lg"></i>
             <div>
               <h1 className="text-lg font-medium">50/34-S</h1>
-              <h3 className="text-sm text-gray-600">
-                Ramnagar, sitapur, uttarpradesh
-              </h3>
+              <h3 className="text-sm text-gray-600">{destination}</h3>
             </div>
           </div>
           <div className="flex gap-5 items-center p-3 ">
             <i className="ri-currency-line text-xl"></i>
             <div>
-              <h1 className="text-lg font-medium">Rs.198.20</h1>
+              <h1 className="text-lg font-medium">{`${"₹"}${
+                fare[vehicleType]
+              }`}</h1>
               <h3 className="text-sm text-gray-600">Cash right now</h3>
             </div>
           </div>
         </div>
       </div>
       <button
-      onClick={()=>{setvehicleFound(true)
-        setconfirmRidepanel(false);
-        setvehiclepanel(false);
-      }}
-      className="bg-green-600 w-full mt-5 text-white font-semibold p-2 rounded-lg">
+        onClick={() => {
+          setvehicleFound(true);
+          setconfirmRidepanel(false);
+          setvehiclepanel(false);
+          createRide();
+        }}
+        className="bg-green-600 w-full mt-5 text-white font-semibold p-2 rounded-lg"
+      >
         Confirm
       </button>
     </div>

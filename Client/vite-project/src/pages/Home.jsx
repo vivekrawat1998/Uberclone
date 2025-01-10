@@ -6,7 +6,9 @@ import Locationpannel from "../components/Location.pannel";
 import VehclePanel from "../components/VehclePanel";
 import ConfirmRide from "../components/ConfirmRide";
 import WaitforVehicle from "../components/WaitforVehicle";
+import axios from "axios";
 import LookingforDriver from "../components/LookingforDriver";
+
 const Home = () => {
   const [pickup, setpickup] = useState("");
   const [destination, setdestination] = useState("");
@@ -19,11 +21,15 @@ const Home = () => {
   const [pickupsuggestion, setpickupsuggestion] = useState([]);
   const [activeField, setActiveField] = useState(false);
   const [destinationSuggestions, setDestinationSuggestions] = useState([]);
+  const [vehicleType, setVehicleType] = useState("");
+  const [fare, setFare] = useState({});
   const vehiclePanelRef = useRef(null);
   const confirmRidepanelRef = useRef(null);
   const VehicleFoundRef = useRef(null);
+
   const submitHandler = (e) => {
     e.preventDefault();
+    console.log();
   };
 
   useGSAP(() => {
@@ -102,8 +108,8 @@ const Home = () => {
         }
       );
       setpickupsuggestion(response.data);
-    } catch {
-      // handle error
+    } catch (error) {
+      console.error("Error fetching pickup suggestions:", error);
     }
   };
 
@@ -119,28 +125,50 @@ const Home = () => {
           },
         }
       );
-      console.log(response);
       setDestinationSuggestions(response.data);
-    } catch {
-      // handle error
+    } catch (error) {
+      console.error("Error fetching destination suggestions:", error);
     }
   };
 
-  // async function createRide() {
-  //   const response = await axios.post(
-  //     `${import.meta.env.VITE_BASE_URL}/ride/create`,
-  //     {
-  //       pickup,
-  //       destination,
-  //       vehicleType,
-  //     },
-  //     {
-  //       headers: {
-  //         Authorization: `Bearer ${localStorage.getItem("token")}`,
-  //       },
-  //     }
-  //   );
-  // }
+  async function findTrip() {
+    setpannelopen(false);
+    setvehiclepanel(true);
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_BASE_URL}/ride/getFare`,
+        {
+          params: { pickup, destination },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      setFare(response.data);
+    } catch (error) {
+      console.error("Error fetching fare:", error.response.data);
+      alert(
+        "Error: " + error.response.data.errors.map((err) => err.msg).join(", ")
+      );
+    }
+  }
+
+  async function createRide() {
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/ride/create`,
+        { pickup, destination, vehicleType },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      console.log(response.data);
+    } catch (error) {
+      console.log(error.response.data);
+    }
+  }
 
   return (
     <div>
@@ -156,7 +184,7 @@ const Home = () => {
           alt=""
         />
       </div>
-      <div className="w-full absolute  flex flex-col justify-end h-screen top-0">
+      <div className="w-full absolute flex flex-col justify-end h-screen top-0">
         <div className="w-full p-5 bg-white h-[30%] relative">
           <h4 className="text-2xl font-semibold">Find a trip</h4>
 
@@ -172,7 +200,6 @@ const Home = () => {
             >
               <i className="ri-arrow-drop-down-line"></i>
             </h2>
-            <div className="line absolute top-[90px] rounded-full left-10 bg-gray-900 w-1 h-16"></div>
             <input
               value={pickup}
               onClick={() => {
@@ -196,10 +223,16 @@ const Home = () => {
               placeholder="Add a Dropoff location"
             />
           </form>
+          <button
+            onClick={findTrip}
+            className="bg-black text-white px-6 w-full text-semibold  py-2 rounded-lg mt-5"
+          >
+            Find Trip
+          </button>
         </div>
         <div
           ref={pannelRef}
-          className="w-full  bg-white overflow-hidden"
+          className="w-full bg-white overflow-hidden"
           style={{ height: "0%" }}
         >
           <Locationpannel
@@ -213,6 +246,7 @@ const Home = () => {
             setpickup={setpickup}
             setdestination={setdestination}
             activeField={activeField}
+            setActiveField={setActiveField}
           />
         </div>
       </div>
@@ -221,8 +255,10 @@ const Home = () => {
         className="fixed z-10 translate-y-full bottom-0 bg-white px-3 py-10 pt-12 w-full"
       >
         <VehclePanel
+          setVehicleType={setVehicleType}
           setconfirmRidepanel={setconfirmRidepanel}
           setvehiclepanel={setvehiclepanel}
+          fare={fare}
         />
       </div>
       <div
@@ -230,16 +266,27 @@ const Home = () => {
         className="fixed z-10 translate-y-full bottom-0 bg-white px-3 py-6 pt-12 w-full"
       >
         <ConfirmRide
+          createRide={createRide}
+          pickup={pickup}
+          destination={destination}
+          fare={fare}
           setconfirmRidepanel={setconfirmRidepanel}
           setvehicleFound={setvehicleFound}
           setvehiclepanel={setvehiclepanel}
+          vehicleType={vehicleType}
         />
       </div>
       <div
         ref={VehicleFoundRef}
         className="fixed z-10 translate-y-full bottom-0 bg-white px-3 py-6 pt-12 w-full"
       >
-        <LookingforDriver setvehicleFound={setvehicleFound} />
+        <LookingforDriver
+          pickup={pickup}
+          destination={destination}
+          fare={fare}
+          vehicleType={vehicleType}
+          setvehicleFound={setvehicleFound}
+        />
       </div>
     </div>
   );

@@ -1,6 +1,11 @@
 import React from "react";
 
-const VehclePanel = ({ setvehiclepanel, setconfirmRidepanel }) => {
+const VehclePanel = ({
+  setvehiclepanel,
+  setconfirmRidepanel,
+  fare,
+  setVehicleType,
+}) => {
   return (
     <div>
       <h3 className="text-2xl font-semibold mb-5 pt-5"> Choose Vehicle</h3>
@@ -13,6 +18,7 @@ const VehclePanel = ({ setvehiclepanel, setconfirmRidepanel }) => {
       <div
         onClick={() => {
           setconfirmRidepanel(true);
+          setVehicleType("car");
         }}
         className="flex border-2 active:border-black mb-2 rounded-xl w-full items-center p-3 justify-between"
       >
@@ -33,11 +39,15 @@ const VehclePanel = ({ setvehiclepanel, setconfirmRidepanel }) => {
             Affordable, compact rides
           </p>
         </div>
-        <h2 className="text-xl font-semibold">Rs193.20</h2>
+        <h2 className="text-xl font-semibold">
+          {"₹"}
+          {fare.car}
+        </h2>
       </div>
       <div
         onClick={() => {
           setconfirmRidepanel(true);
+          setVehicleType("moto");
         }}
         className="flex border-2 active:border-black mb-2 rounded-xl w-full items-center p-3 justify-between"
       >
@@ -58,11 +68,15 @@ const VehclePanel = ({ setvehiclepanel, setconfirmRidepanel }) => {
             Affordable,Motorcycle rides
           </p>
         </div>
-        <h2 className="text-xl font-semibold">Rs65.20</h2>
+        <h2 className="text-xl font-semibold">
+          {"₹"}
+          {fare.moto}
+        </h2>
       </div>
       <div
         onClick={() => {
           setconfirmRidepanel(true);
+          setVehicleType("auto");
         }}
         className="flex border-2 active:border-black mb-2 rounded-xl w-full items-center p-3 justify-between"
       >
@@ -83,7 +97,10 @@ const VehclePanel = ({ setvehiclepanel, setconfirmRidepanel }) => {
             Affordable Auto rides
           </p>
         </div>
-        <h2 className="text-xl font-semibold">Rs118.20</h2>
+        <h2 className="text-xl font-semibold">
+          {"₹"}
+          {fare.moto}
+        </h2>
       </div>
     </div>
   );
