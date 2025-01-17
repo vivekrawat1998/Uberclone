@@ -8,7 +8,8 @@ const [password, setpassword] = useState("")
 const [userData, setuserData] = useState({})
 const navigate = useNavigate();
 
-const [user, setuser] =  useContext(UserdataContext)
+const { user, setuser } = useContext(UserdataContext);
+
 
 const HandleLogin = async (e) =>{
   e.preventDefault()

@@ -1,6 +1,8 @@
 const { validationResult } = require("express-validator");
 const rideService = require("../services/ride.services");
-
+const mapServices = require("../services/Maps.services");
+const { sendMessageToSocketId } = require("../socket");
+const rideModel = require("../models/ride.model")
 module.exports.createRide = async (req, res) => {
   console.log("Received Request Body:", req.body);
 
@@ -24,6 +26,24 @@ module.exports.createRide = async (req, res) => {
       vehicleType: vehicleType,
     });
     res.status(201).json(ride);
+    const pickupCordinates = await mapServices.getAddressCoordinate(pickup);
+    const captainInRadius = await mapServices.getCaptainsInTheRadius(
+      pickupCordinates.ltd,
+      pickupCordinates.lng,
+      2
+    );
+    ride.otp = "";
+    const rideWithUser = await rideModel
+      .findOne({ _id: ride._id })
+      .populate("user");
+    captainInRadius.map((captain) => {
+      sendMessageToSocketId(captain.socketId, {
+        event: "new-ride",
+        data: rideWithUser,
+      });
+    });
+
+    console.log(captainInRadius);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Server Error" });

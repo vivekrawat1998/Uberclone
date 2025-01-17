@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import "remixicon/fonts/remixicon.css";
@@ -8,7 +8,8 @@ import ConfirmRide from "../components/ConfirmRide";
 import WaitforVehicle from "../components/WaitforVehicle";
 import axios from "axios";
 import LookingforDriver from "../components/LookingforDriver";
-
+import { SocketContext } from "../context/SocketContext";
+import { UserdataContext } from "../context/UserContext";
 const Home = () => {
   const [pickup, setpickup] = useState("");
   const [destination, setdestination] = useState("");
@@ -26,12 +27,16 @@ const Home = () => {
   const vehiclePanelRef = useRef(null);
   const confirmRidepanelRef = useRef(null);
   const VehicleFoundRef = useRef(null);
-
+  const { socket } = useContext(SocketContext);
+  const { user } = useContext(UserdataContext);
   const submitHandler = (e) => {
     e.preventDefault();
     console.log();
   };
 
+  useEffect(() => {
+    socket.emit("join", { userType: "user", userId: user._id });
+  }, [user]);
   useGSAP(() => {
     if (pannelopen) {
       gsap.to(pannelRef.current, {

@@ -1,18 +1,43 @@
-import React, { useEffect } from "react"
-import { useNavigate } from "react-router-dom"
+import React, { useContext, useEffect, useState } from 'react'
+import { UserdataContext } from '../context/UserContext'
+import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
 
-const UserProtectedRoute =  ({
+const UserProtectRoute = ({
     children
 }) => {
     const token = localStorage.getItem('token')
     const navigate = useNavigate()
+    const { user, setuser } = useContext(UserdataContext)
+    const [ isLoading, setIsLoading ] = useState(true)
 
     useEffect(() => {
         if (!token) {
             navigate('/user-login')
         }
-    }, [token, navigate])
 
+        axios.get(`${import.meta.env.VITE_BASE_URL}/users/profile`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        }).then(response => {
+            if (response.status === 200) {
+                setuser(response.data)
+                setIsLoading(false)
+            }
+        })
+            .catch(err => {
+                console.log(err)
+                localStorage.removeItem('token')
+                navigate('/user-login')
+            })
+    }, [ token ])
+
+    if (isLoading) {
+        return (
+            <div>Loading...</div>
+        )
+    }
 
     return (
         <>
@@ -21,5 +46,4 @@ const UserProtectedRoute =  ({
     )
 }
 
-
-export default UserProtectedRoute
+export default UserProtectRoute
