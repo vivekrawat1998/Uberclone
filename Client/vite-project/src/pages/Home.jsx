@@ -5,7 +5,7 @@ import "remixicon/fonts/remixicon.css";
 import Locationpannel from "../components/Location.pannel";
 import VehclePanel from "../components/VehclePanel";
 import ConfirmRide from "../components/ConfirmRide";
-import WaitforVehicle from "../components/WaitforVehicle";
+import WaitforVehicle from "../components/Waitingfordriver";
 import axios from "axios";
 import LookingforDriver from "../components/LookingforDriver";
 import { SocketContext } from "../context/SocketContext";
@@ -22,13 +22,16 @@ const Home = () => {
   const [pickupsuggestion, setpickupsuggestion] = useState([]);
   const [activeField, setActiveField] = useState(false);
   const [destinationSuggestions, setDestinationSuggestions] = useState([]);
+  const [ waitingForDriver, setWaitingForDriver ] = useState(false)
   const [vehicleType, setVehicleType] = useState("");
   const [fare, setFare] = useState({});
   const vehiclePanelRef = useRef(null);
   const confirmRidepanelRef = useRef(null);
   const VehicleFoundRef = useRef(null);
+  const waitingForDriverRef = useRef(null)
   const { socket } = useContext(SocketContext);
   const { user } = useContext(UserdataContext);
+  const [ride, setRide] = useState(null)
   const submitHandler = (e) => {
     e.preventDefault();
     console.log();
@@ -37,6 +40,13 @@ const Home = () => {
   useEffect(() => {
     socket.emit("join", { userType: "user", userId: user._id });
   }, [user]);
+
+  socket.on("ride-confirmed", (ride) => {
+    setvehicleFound(false);
+    setWaitingForDriver(true);
+    setRide(ride);
+  });
+
   useGSAP(() => {
     if (pannelopen) {
       gsap.to(pannelRef.current, {
@@ -99,6 +109,19 @@ const Home = () => {
       });
     }
   }, [vehiclefound]);
+
+
+  useGSAP(function () {
+    if (waitingForDriver) {
+        gsap.to(waitingForDriverRef.current, {
+            transform: 'translateY(0)'
+        })
+    } else {
+        gsap.to(waitingForDriverRef.current, {
+            transform: 'translateY(100%)'
+        })
+    }
+}, [ waitingForDriver ])
 
   const handlepickupChange = async (e) => {
     setpickup(e.target.value);
@@ -291,6 +314,17 @@ const Home = () => {
           fare={fare}
           vehicleType={vehicleType}
           setvehicleFound={setvehicleFound}
+        />
+      </div>
+      <div
+        ref={waitingForDriverRef}
+        className="fixed w-full  z-10 bottom-0  bg-white px-3 py-6 pt-12"
+      >
+        <WaitforVehicle
+          ride={ride}
+          setvehicleFound={setvehicleFound}
+          setWaitingForDriver={setWaitingForDriver}
+          waitingForDriver={waitingForDriver}
         />
       </div>
     </div>

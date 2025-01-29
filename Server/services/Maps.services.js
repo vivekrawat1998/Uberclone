@@ -10,35 +10,25 @@ module.exports.getAddressCoordinate = async (address) => {
   try {
     console.log(`Requesting URL: ${url}`);
     const response = await axios.get(url);
-    const data = response.data;
-
-    console.log("GoMaps API response:", data);
-
-    if (data.status === "OK") {
-      const location = data.results[0].geometry.location;
-      return {
-        lat: location.lat,
-        lng: location.lng,
-      };
+    if (response.data.status === 'OK') {
+      console.log('Geocode API response:', response.data);
+      const location = response.data.results[0]?.geometry?.location;
+      if (location) {
+        return {
+          ltd: location.lat,
+          lng: location.lng,
+        };
+      } else {
+        throw new Error("Location not found in the Geocode response");
+      }
     } else {
-      console.error("GoMaps API error:", data.status, data.error_message);
-      throw new Error("Unable to fetch coordinates");
+      throw new Error('Unable to fetch coordinates');
     }
   } catch (error) {
-    if (error.response) {
-      console.error("Error response data:", error.response.data);
-      console.error("Error response status:", error.response.status);
-      console.error("Error response headers:", error.response.headers);
-    } else if (error.request) {
-      console.error("Error request data:", error.request);
-    } else {
-      console.error("Error message:", error.message);
-    }
-    console.error("Error config:", error.config);
+    handleApiError(error);
     throw new Error("Error occurred while fetching coordinates");
   }
 };
-
 module.exports.getDistanceTime = async (origin, destination) => {
   if (!origin || !destination) {
     throw new Error("Origin and destination are required");
@@ -98,13 +88,10 @@ module.exports.getAutoCompleteSuggestion = async (input) => {
 
     console.log("GoMaps API autocomplete response:", data);
 
-    if (data.status === "OK") {
-      return response.data.predictions
-        .map((prediction) => prediction.description)
-        .filter((value) => value);
+    if (response.data.status === 'OK') {
+      return response.data.predictions.map(prediction => prediction.description).filter(value => value);
     } else {
-      console.error("GoMaps API error:", data.status, data.error_message);
-      throw new Error("Unable to fetch autocomplete suggestions");
+      throw new Error("Unable to fetch coordinates");
     }
   } catch (error) {
     if (error.response) {
@@ -122,13 +109,26 @@ module.exports.getAutoCompleteSuggestion = async (input) => {
 };
 
 module.exports.getCaptainsInTheRadius = async (ltd, lng, radius) => {
+  console.log(`Searching for captains within ${radius} km of location: ${ltd}, ${lng}`);
+  
+  // radius in km
   const captains = await captainModel.find({
     location: {
       $geoWithin: {
-        $centerSphere: [[ltd, lng], radius / 6371],
+        $centerSphere: [[ltd, lng], radius / 6371], // 6371 is the radius of Earth in km
       },
     },
   });
+
+  console.log(`Found ${captains.length} captains in the radius`);
+
+  if (captains.length === 0) {
+    console.log("No captains found in the specified radius.");
+  } else {
+    captains.forEach((captain) => {
+      console.log(`Captain Location: ${captain.location}`);
+    });
+  }
 
   return captains;
 };
